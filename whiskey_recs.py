@@ -53,16 +53,13 @@ def main():
 
     ]
     rev_return = [
+        [sg.Text('Score')],
+        [sg.Text("", size = (5, 5), enable_events = True, key = '-SCR-')],
         [sg.Text('Review:')],
         [sg.Text("", size = (40, 20), enable_events = True, key = '-REV-')]
     ]
 
-    score_return = [
-        [sg.Text('Score')],
-        [sg.Text("", size = (5, 5), enable_events = True, key = '-SCR-')]
-    ]
-
-    layout = [search_element, s_return, c_return, score_return, rev_return]
+    layout = [[search_element, sg.Column(s_return), sg.Column(c_return), sg.VSeparator(), sg.Column(rev_return)]]
     window = sg.Window('Whisky Recommender', layout, resizable = True)
 
     #event loop
