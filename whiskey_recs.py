@@ -14,6 +14,20 @@ def s_query(phrase:str) ->str:
     '''
     return q_string
 
+def c_query(cluster_num:str) ->str:
+    '''Returns a string that is a runnable SQL query on the whiskey db'''
+
+    c_string = f'''
+    SELECT whiskey_stats.name, whiskey_stats.score, clusters.clustering, reviews.review
+    FROM whiskey_stats
+    INNER JOIN clusters
+    ON whiskey_stats.whiskey_id = clusters.whiskey_id
+    INNER JOIN reviews
+    ON whiskey_stats.whiskey_id = reviews.whiskey_id
+    WHERE clusters.clustering = {cluster_num}
+    '''
+    return c_string
+
 
 
 def main():
@@ -29,11 +43,17 @@ def main():
     ]
 
     s_return = [
-        [sg.Text('Whiskys Found')],
-        [sg.Listbox(values = [], size = (40, 20), key = '-WF-')]
+        [sg.Text('Whiskys Found:')],
+        [sg.Listbox(values = [], size = (40, 20), enable_events = True, key = '-WF-')]
     ]
 
-    layout = [search_element, s_return]
+    c_return = [
+        [sg.Text('Cluster Mates:')],
+        [sg.Listbox(values = [], size = (40, 20), enable_events = True, key = '-CF-')]
+
+    ]
+
+    layout = [search_element, s_return, c_return]
     window = sg.Window('Whisky Recommender', layout, resizable = True)
 
     #event loop
@@ -45,8 +65,20 @@ def main():
             ws_quer = s_query(values['-WS-'])
             results = pd.read_sql(ws_quer, con)
             w_names = results['name'].to_list()
+            w_nums = results['clustering'].to_list()
+            w_dict = {}
+            for n, c in zip(w_names, w_nums):
+                w_dict.update({n:c})
             window['-WF-'].update(w_names)
-           
+
+        elif event == '-WF-':
+            #values['-WF-'] will return a list with one value: the highlited name
+            #the setup below will call the key from the dictionary to get the cluster
+            c_val = w_dict[values['-WF-'][0]]
+            c_q = c_query(c_val) 
+            c_res = pd.read_sql(c_q, con)
+            c_names = c_res['name'].to_list() 
+            window['-CF-'].update(c_names)          
 
                 
         if event== sg.WIN_CLOSED:
