@@ -52,8 +52,17 @@ def main():
         [sg.Listbox(values = [], size = (40, 20), enable_events = True, key = '-CF-')]
 
     ]
+    rev_return = [
+        [sg.Text('Review:')],
+        [sg.Text("", size = (40, 20), enable_events = True, key = '-REV-')]
+    ]
 
-    layout = [search_element, s_return, c_return]
+    score_return = [
+        [sg.Text('Score')],
+        [sg.Text("", size = (5, 5), enable_events = True, key = '-SCR-')]
+    ]
+
+    layout = [search_element, s_return, c_return, score_return, rev_return]
     window = sg.Window('Whisky Recommender', layout, resizable = True)
 
     #event loop
@@ -77,8 +86,23 @@ def main():
             c_val = w_dict[values['-WF-'][0]]
             c_q = c_query(c_val) 
             c_res = pd.read_sql(c_q, con)
-            c_names = c_res['name'].to_list() 
-            window['-CF-'].update(c_names)          
+            c_names = c_res['name'].to_list()
+            c_revs = c_res['review'].to_list()
+            c_score = c_res['score'].to_list()
+            rev_dict = {}
+            for n, r in zip(c_names, c_revs):
+                rev_dict.update({n:r})
+            score_dict = {} 
+            for n, s in zip(c_names, c_score):
+                score_dict.update({n:s})
+            window['-CF-'].update(c_names) 
+
+        elif event =='-CF-':
+            scr_val = score_dict[values['-CF-'][0]]
+            scr_val = str(scr_val)
+            rev_val = rev_dict[values['-CF-'][0]]
+            window['-SCR-'].update(scr_val)
+            window['-REV-'].update(rev_val)         
 
                 
         if event== sg.WIN_CLOSED:
