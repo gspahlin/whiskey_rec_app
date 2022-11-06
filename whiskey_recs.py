@@ -28,9 +28,12 @@ def main():
         [sg.Button('Search')]
     ]
 
-    s_return = []
+    s_return = [
+        [sg.Text('Whiskys Found')],
+        [sg.Listbox(values = [], size = (40, 20), key = '-WF-')]
+    ]
 
-    layout = [search_element]
+    layout = [search_element, s_return]
     window = sg.Window('Whisky Recommender', layout, resizable = True)
 
     #event loop
@@ -41,7 +44,9 @@ def main():
         if event == 'Search':
             ws_quer = s_query(values['-WS-'])
             results = pd.read_sql(ws_quer, con)
-            print(results.iloc[0])
+            w_names = results['name'].to_list()
+            window['-WF-'].update(w_names)
+           
 
                 
         if event== sg.WIN_CLOSED:
